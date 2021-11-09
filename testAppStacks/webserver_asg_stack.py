@@ -8,9 +8,9 @@ from aws_cdk import (
 class WebserverASGStack(cdk.Stack):
     def __init__(self, scope: cdk.Construct, construct_id: str, vpc, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-        self.user_data = ec2.UserData.custom(
-            content='#!/bin/bash\nsudo su\nyum update -y\nyum install -y httpd.x86_64\nsystemctl start httpd.service\nsystemctl enable httpd.service\necho "Hello World from $(hostname -f)" > /var/www/html/index.html'
-        )
+        self.user_data_from_file = open("./userdata.sh", "r").read()
+        self.user_data = ec2.UserData.for_linux()
+        self.user_data.add_commands(str(self.user_data_from_file))
         self.machine_image = ec2.MachineImage.generic_linux(
             {"us-east-1": "ami-01cc34ab2709337aa"},
             user_data=self.user_data,
